@@ -21,7 +21,7 @@ public class BanCommand extends SimpleCommand {
     @Override
     protected void onCommand() {
         Player player = getPlayer();
-        Player target = Bukkit.getPlayer(args[0]);
+        Player target = Bukkit.getOfflinePlayer(args[0]).getPlayer();
         if (target == null) {
             tellError("Spieler nicht gefunden");
         }
