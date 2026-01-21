@@ -1,6 +1,7 @@
 package org.creepz.command;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.creepz.util.database.BanManager;
 import org.mineacademy.fo.command.SimpleCommand;
@@ -21,7 +22,7 @@ public class BanCommand extends SimpleCommand {
     @Override
     protected void onCommand() {
         Player player = getPlayer();
-        Player target = Bukkit.getOfflinePlayer(args[0]).getPlayer();
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
         if (target == null) {
             tellError("Spieler nicht gefunden");
         }
