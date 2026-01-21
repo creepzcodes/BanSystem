@@ -6,6 +6,7 @@ import org.creepz.util.database.BanManager;
 import org.mineacademy.fo.command.SimpleCommand;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class BanCommand extends SimpleCommand {
 
@@ -56,6 +57,23 @@ public class BanCommand extends SimpleCommand {
         tellSuccess("Dauer: '"+duration+"'");
 
         target.kickPlayer(banManager.getBanMessage(target.getUniqueId()));
+    }
+
+    @Override
+    protected List<String> tabComplete() {
+        if (args.length == 1) {
+            return completeLastWordPlayerNames();
+        }
+
+        if (args.length == 2) {
+            return List.of("1m", "1h", "1d", "perm");
+        }
+
+        if (args.length == 3) {
+            return List.of("Sei nicht so frech", "Beleidigung");
+        }
+
+        return super.tabComplete();
     }
 
     private long parseTime(String input) {
