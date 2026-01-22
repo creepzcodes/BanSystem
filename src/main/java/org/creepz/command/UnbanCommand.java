@@ -2,7 +2,7 @@ package org.creepz.command;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.creepz.util.database.BanManager;
+import org.creepz.util.database.ban.BanManager;
 import org.mineacademy.fo.command.SimpleCommand;
 
 import java.util.List;
@@ -19,8 +19,8 @@ public class UnbanCommand extends SimpleCommand {
     @Override
     protected void onCommand() {
 
-        checkArgs(1, "Usage: unban <player>");
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
+        //checkArgs(0, "Usage: unban <player>");
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
 
         if (!banManager.isBanned(target.getUniqueId())) {
             tellError("Der Spieler ist nicht gebannt!");
@@ -28,13 +28,13 @@ public class UnbanCommand extends SimpleCommand {
         }
 
         banManager.unBan(target.getUniqueId());
-        tellSuccess("Der Spieler '"+target.getName()+"' wurde entmuted");
+        tellSuccess("Der Spieler '"+target.getName()+"' wurde entbannt!");
     }
 
     @Override
     protected List<String> tabComplete() {
 
-        if (args.length == 1) {
+        if (args.length == 0) {
             return completeLastWordPlayerNames();
         }
 

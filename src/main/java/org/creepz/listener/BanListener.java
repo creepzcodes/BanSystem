@@ -1,12 +1,9 @@
 package org.creepz.listener;
 
-import io.papermc.paper.connection.PlayerLoginConnection;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
-import org.creepz.util.database.Ban;
-import org.creepz.util.database.BanManager;
+import org.creepz.util.database.ban.BanManager;
 
 import java.util.UUID;
 

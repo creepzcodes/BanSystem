@@ -2,32 +2,35 @@ package org.creepz.command;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.creepz.util.database.ban.BanManager;
+import org.creepz.util.database.mute.MuteManager;
 import org.mineacademy.fo.command.SimpleCommand;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class BanCommand extends SimpleCommand {
+public class MuteCommand extends SimpleCommand {
 
-    private final BanManager banManager;
+    private static MuteManager muteManager;
 
-    public BanCommand(BanManager banManager) {
-        super("ban");
-        this.banManager = banManager;
-        setPermission("command.ban");
+    public MuteCommand(MuteManager muteManager) {
+        super("mute");
+        setPermission("command.mute");
+        this.muteManager = muteManager;
     }
 
     @Override
     protected void onCommand() {
+
         Player player = getPlayer();
         Player target = Bukkit.getOfflinePlayer(args[0]).getPlayer();
         if (target == null) {
-            tellError("Spieler nicht gefunden");
+            tellError("Dieser Spieler wurde nicht gefunden!");
+            return;
         }
 
-        if (banManager.isBanned(target.getUniqueId())) {
-            tellError("Spieler ist bereits gebannt!");
+        if (muteManager.isMuted(target.getUniqueId())) {
+            tellError("Dieser Spieler ist bereits gemuted!");
+            tellError(muteManager.getMuteMessage(target.getUniqueId()));
             return;
         }
 
@@ -43,22 +46,24 @@ public class BanCommand extends SimpleCommand {
         }
 
         String reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
-        String bannedBy = sender.getName();
+        String mutedBy = sender.getName();
 
-        banManager.ban(
+        muteManager.mute(
                 target.getUniqueId(),
                 reason,
-                bannedBy,
+                mutedBy,
                 duration
         );
 
-        tellSuccess("Der Spieler '"+target.getName()+"' wurde erfolgreich gebannt!");
+        tellSuccess("------------------------------");
+        tellSuccess("§5");
+        tellSuccess("Der Spieler' "+target.getName()+"' wurde erfolgreich gemuted!");
+        tellSuccess("Dauer: '"+muteManager.formatTime(duration)+"'");
         tellSuccess("Grund: '"+reason+"'");
-        tellSuccess("Dauer: '"+banManager.formatTime(duration)+"'");
+        tellSuccess("§5");
+        tellSuccess("------------------------------");
 
-        if (target.isOnline()) {
-            target.kickPlayer(banManager.getBanMessage(target.getUniqueId()));
-        }
+        target.sendMessage(muteManager.getMuteMessage(target.getUniqueId()));
     }
 
     @Override
@@ -74,6 +79,7 @@ public class BanCommand extends SimpleCommand {
         if (args.length == 3) {
             return List.of("Sei nicht so frech", "Beleidigung");
         }
+
 
         return super.tabComplete();
     }

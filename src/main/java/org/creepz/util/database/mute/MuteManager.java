@@ -1,4 +1,7 @@
-package org.creepz.util.database;
+package org.creepz.util.database.mute;
+
+import org.creepz.util.database.DatabaseConnection;
+import org.creepz.util.database.ban.Ban;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -6,84 +9,85 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class BanManager {
+public class MuteManager {
 
     private final DatabaseConnection db;
-    private final Map<UUID, Ban> cache = new HashMap<>();
-    public BanManager(DatabaseConnection db) {
+    private final Map<UUID, Mute> cache = new HashMap<>();
+
+    public MuteManager(DatabaseConnection db) {
         this.db = db;
     }
 
-    public void ban(UUID uuid, String reason, String bannedBy, long duration) {
+    public void mute(UUID uuid, String reason, String mutedBy, long duration) {
         long start = System.currentTimeMillis();
         long end = duration == -1 ? -1 : start + duration;
 
-        Ban ban = new Ban(uuid, reason, bannedBy, start, end);
-        cache.put(uuid, ban);
+        Mute mute = new Mute(uuid, reason, mutedBy, start, end);
+        cache.put(uuid, mute);
 
         try {
             PreparedStatement statement = db.getConnection().prepareStatement(
-                    "REPLACE INTO bans VALUES (?,?,?,?,?)"
+                    "REPLACE INTO mutes VALUES (?,?,?,?,?)"
             );
             statement.setString(1, uuid.toString());
             statement.setString(2, reason);
-            statement.setString(3, bannedBy);
-            statement.setLong(4, start);
-            statement.setLong(5, end);
+            statement.setString(3, mutedBy);
+            statement.setString(4, String.valueOf(start));
+            statement.setString(5, String.valueOf(end));
             statement.executeUpdate();
-        } catch (SQLException e) {
+        } catch (SQLException e)  {
             e.printStackTrace();
         }
     }
 
-    public void unBan(UUID uuid) {
+    public void unmute(UUID uuid) {
         cache.remove(uuid);
 
         try {
             PreparedStatement statement = db.getConnection().prepareStatement(
-                    "DELETE FROM bans WHERE uuid=?"
+                    "DELETE FROM mutes WHERE uuid=?"
             );
             statement.setString(1, uuid.toString());
             statement.executeUpdate();
-        } catch (SQLException e) {
+        }  catch (SQLException e)  {
             e.printStackTrace();
         }
     }
 
-    public boolean isBanned(UUID uuid) {
+    public boolean isMuted(UUID uuid) {
         if (!cache.containsKey(uuid)) return false;
 
-        Ban ban = cache.get(uuid);
-        if (ban.isExpired()) {
-            unBan(uuid);
+        Mute mute = cache.get(uuid);
+        if (mute.isExpired()) {
+            cache.remove(uuid);
             return false;
         }
         return true;
     }
 
-    public Ban getBan(UUID uuid) {
+    public Mute getMute(UUID uuid) {
         return cache.get(uuid);
     }
 
-    public String getBanMessage(UUID uuid) {
-        Ban ban = getBan(uuid);
+    public String getMuteMessage(UUID uuid) {
+        Mute mute = getMute(uuid);
 
-        if (ban == null) {
+        if (mute == null) {
             return "Du bist gebannt.";
         }
 
         String duration;
-        if (ban.getEndTime() == -1) {
+        if (mute.getEndTime() == -1) {
             duration = "Permanent";
         } else {
-            duration = formatTime(ban.getEndTime() - System.currentTimeMillis());
+            duration = formatTime(mute.getEndTime() - System.currentTimeMillis());
         }
 
-        return "§c§lDu bist gebannt!\n\n" +
-                "§7Grund: " + ban.getReason() + "\n" +
-                "§7Von: " + ban.getBannedBy() + "\n" +
+        return "§c§lDu wurdest gemuted!\n\n" +
+                "§7Grund: " + mute.getReason() + "\n" +
+                "§7Von: " + mute.getMutedBy() + "\n" +
                 "§7Dauer: " + duration + "\n\n" +
-                "§7Ban-ID: §8" + ban.getUuid().toString().substring(0, 8);
+                "§7Mute-ID: §8" + mute.getUuid().toString().substring(0, 8);
     }
 
     public String formatTime(long millis) {
@@ -104,4 +108,6 @@ public class BanManager {
 
         return sb.toString().trim();
     }
+
+
 }

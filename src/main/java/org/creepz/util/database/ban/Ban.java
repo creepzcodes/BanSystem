@@ -1,4 +1,4 @@
-package org.creepz.util.database;
+package org.creepz.util.database.ban;
 
 import lombok.Getter;
 

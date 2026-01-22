@@ -18,7 +18,7 @@ public class DatabaseConnection {
     private final String host = "localhost";
     private final String port = "3309";
     private final String database = "bauhd";
-    private final String user = "localhost";
+    private final String user = "root";
     private final String password = "";
 
     public void connect() {
@@ -63,10 +63,22 @@ public class DatabaseConnection {
 
     private void createTables(Connection connection) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
-                "CREATE TABLE bans (" +
+                "CREATE TABLE IF NOT EXISTS bans (" +
                         "uuid VARCHAR(36) PRIMARY KEY, " +
                         "reason TEXT NOT NULL, " +
                         "banned_by VARCHAR(100) NOT NULL, " +
+                        "start_time BIGINT NOT NULL," +
+                        "end_time BIGINT NOT NULL"+
+                        ")"
+        )) {
+            statement.executeUpdate();
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(
+                "CREATE TABLE IF NOT EXISTS mutes (" +
+                        "uuid VARCHAR(36) PRIMARY KEY, " +
+                        "reason TEXT NOT NULL, " +
+                        "muted_by VARCHAR(100) NOT NULL, " +
                         "start_time BIGINT NOT NULL," +
                         "end_time BIGINT NOT NULL"+
                         ")"
